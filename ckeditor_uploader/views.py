@@ -129,7 +129,8 @@ class ImageUploadView(generic.View):
                     new_im = im.resize((new_width,new_height))
 
             if new_im!=None:
-                new_path = os.path.abspath(os.path.join(settings.MEDIA_ROOT,saved_path))
+                new_path = os.path.join(settings.MEDIA_ROOT,saved_path)
+                print('new_path='+new_path)
                 ext = filename.split('.')[-1].lower()
                 if ext in ['jpg', 'jpeg']:
                     new_im.save(new_path, 'JPEG')
