@@ -118,8 +118,14 @@ class ImageUploadView(generic.View):
             img = Image.open(uploaded_file)
             width, height = img.size
             
+            print('CKEDITOR_IMAGE_MAX_WIDTH=' +str(settings.CKEDITOR_IMAGE_MAX_WIDTH))
+            print('CKEDITOR_IMAGE_MAX_HEIGHT=' + str(settings.CKEDITOR_IMAGE_MAX_HEIGHT))
+            
             if(settings.CKEDITOR_IMAGE_MAX_WIDTH>0 and settings.CKEDITOR_IMAGE_MAX_HEIGHT>0):
 
+                print('width=' +str(width))
+                print('height=' +str(height))
+            
                 if width>height:
                     if width>settings.CKEDITOR_IMAGE_MAX_WIDTH:
                         new_width = settings.CKEDITOR_IMAGE_MAX_WIDTH
@@ -132,23 +138,36 @@ class ImageUploadView(generic.View):
                 new_width = width
                 new_height = height
         
-        if(str(img_format).lower() == "png"):
+        print('new_width=' +str(new_width))
+        print('new_height=' +str(new_height))
+        
+        if(str(img_format).lower() == ".png"):
 
             img = Image.open(uploaded_file)
             #img = img.resize(img.size, Image.ANTIALIAS)
             img = img.resize((new_width,new_height))
-            saved_path = default_storage.save("{}.jpg".format(img_name), uploaded_file)
-            img.save("{}.jpg".format(img_name), quality=IMAGE_QUALITY, optimize=True)
+            #saved_path = default_storage.save("{}.jpg".format(img_name), uploaded_file)
+            saved_path = default_storage.save(filename, uploaded_file)
+            new_path = os.path.abspath(os.path.join(settings.MEDIA_ROOT,saved_path))
+            print('new_path=' +str(new_path))
+            #img.save("{}.jpg".format(img_name), quality=IMAGE_QUALITY, optimize=True)
+            img.save(new_path, quality=IMAGE_QUALITY, optimize=True)
 
-        elif(str(img_format).lower() == "jpg" or str(img_format).lower() == "jpeg"):
+        elif(str(img_format).lower() == ".jpg" or str(img_format).lower() == ".jpeg"):
 
+            print('img_format=' +str(img_format))
+        
             img = Image.open(uploaded_file)
             #img = img.resize(img.size, Image.ANTIALIAS)
             img = img.resize((new_width,new_height))
             saved_path = default_storage.save(filename, uploaded_file)
-            img.save(saved_path, quality=IMAGE_QUALITY, optimize=True)
+            new_path = os.path.abspath(os.path.join(settings.MEDIA_ROOT,saved_path))
+            print('new_path=' +str(new_path))
+            img.save(new_path, quality=IMAGE_QUALITY, optimize=True)
 
         else:
+            print('img_format=' +str(img_format))
+        
             saved_path = default_storage.save(filename, uploaded_file)
 
         return saved_path
