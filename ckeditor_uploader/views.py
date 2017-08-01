@@ -115,7 +115,7 @@ class ImageUploadView(generic.View):
         IMAGE_QUALITY = getattr(settings, "IMAGE_QUALITY", 60)
 
         img = Image.open(uploaded_file)
-        width, height = im.size
+        width, height = img.size
         
         if(settings.CKEDITOR_IMAGE_MAX_WIDTH>0 and settings.CKEDITOR_IMAGE_MAX_HEIGHT>0):
 
@@ -135,7 +135,7 @@ class ImageUploadView(generic.View):
 
             img = Image.open(uploaded_file)
             #img = img.resize(img.size, Image.ANTIALIAS)
-            img = im.resize((new_width,new_height))
+            img = img.resize((new_width,new_height))
             saved_path = default_storage.save("{}.jpg".format(img_name), uploaded_file)
             img.save("{}.jpg".format(img_name), quality=IMAGE_QUALITY, optimize=True)
 
@@ -143,7 +143,7 @@ class ImageUploadView(generic.View):
 
             img = Image.open(uploaded_file)
             #img = img.resize(img.size, Image.ANTIALIAS)
-            img = im.resize((new_width,new_height))
+            img = img.resize((new_width,new_height))
             saved_path = default_storage.save(filename, uploaded_file)
             img.save(saved_path, quality=IMAGE_QUALITY, optimize=True)
 
