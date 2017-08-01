@@ -115,8 +115,8 @@ class ImageUploadView(generic.View):
         IMAGE_QUALITY = getattr(settings, "IMAGE_QUALITY", 60)
 
         import logging
-        logger = logging.getLogger('testlogger')
-        logger.info('This is a simple log message')
+        logger = logging.getLogger(__name__)
+        logger.info('some important infos')
         
         if is_image(filename):
             img = Image.open(uploaded_file)
