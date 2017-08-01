@@ -113,7 +113,7 @@ class ImageUploadView(generic.View):
         saved_path = default_storage.save(filename, uploaded_file)
 
         print('MAXSIZE =' + str(settings.CKEDITOR_IMAGE_MAX_WIDTH) + 'x' + str(settings.CKEDITOR_IMAGE_MAX_HEIGHT))
-        
+        sys.stdout.flush()
         if is_image(filename) and settings.CKEDITOR_IMAGE_MAX_WIDTH>0 and settings.CKEDITOR_IMAGE_MAX_HEIGHT>0:
             im = Image.open(uploaded_file)
             width, height = im.size
@@ -133,6 +133,7 @@ class ImageUploadView(generic.View):
             if new_im!=None:
                 new_path = os.path.join(settings.MEDIA_ROOT,saved_path)
                 print('new_path='+new_path)
+                sys.stdout.flush()
                 ext = filename.split('.')[-1].lower()
                 if ext in ['jpg', 'jpeg']:
                     new_im.save(new_path, 'JPEG')
