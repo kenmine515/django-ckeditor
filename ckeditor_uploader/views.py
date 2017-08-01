@@ -114,10 +114,6 @@ class ImageUploadView(generic.View):
         img_name, img_format = os.path.splitext(filename)
         IMAGE_QUALITY = getattr(settings, "IMAGE_QUALITY", 60)
 
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.info('some important infos')
-        
         if is_image(filename):
             img = Image.open(uploaded_file)
             width, height = img.size
