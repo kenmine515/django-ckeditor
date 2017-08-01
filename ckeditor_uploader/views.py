@@ -25,7 +25,7 @@ def _get_user_path(user):
     RESTRICT_BY_USER = getattr(settings, 'CKEDITOR_RESTRICT_BY_USER', False)
     if RESTRICT_BY_USER:
         try:
-            user_prop = getattr(user, RESTRICT_BY_USER)
+            user_prop = getattr(user, str(RESTRICT_BY_USER))
         except (AttributeError, TypeError):
             user_prop = getattr(user, 'get_username')
 
