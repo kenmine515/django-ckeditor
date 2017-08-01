@@ -112,7 +112,7 @@ class ImageUploadView(generic.View):
         filename = get_upload_filename(uploaded_file.name, request.user)
         saved_path = default_storage.save(filename, uploaded_file)
 
-        if is_image(filename):
+        if is_image(filename) and settings.CKEDITOR_IMAGE_MAX_WIDTH>0 and settings.CKEDITOR_IMAGE_MAX_HEIGHT>0:
             im = Image.open(uploaded_file)
             width, height = im.size
             new_im = None
