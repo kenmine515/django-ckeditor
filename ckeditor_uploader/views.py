@@ -110,26 +110,33 @@ class ImageUploadView(generic.View):
     @staticmethod
     def _save_file(request, uploaded_file):
         filename = get_upload_filename(uploaded_file.name, request.user)
+        saved_path = default_storage.save(filename, uploaded_file)
 
-        img_name, img_format = os.path.splitext(filename)
-        IMAGE_QUALITY = getattr(settings, "IMAGE_QUALITY", 60)
+        if is_image(filename):
+            im = Image.open(uploaded_file)
+            width, height = im.size
+            new_im = None
 
-        if(str(img_format).lower() == "png"):
+            if width>height:
+                if width>settings.CKEDITOR_IMAGE_MAX_WIDTH:
+                    new_width = settings.CKEDITOR_IMAGE_MAX_WIDTH
+                    new_height = int(new_width/width*height)
+                    new_im = im.resize((new_width,new_height))
+            else:
+                if height>settings.CKEDITOR_IMAGE_MAX_HEIGHT:
+                    new_height = settings.CKEDITOR_IMAGE_MAX_HEIGHT
+                    new_width = int(new_height/height*width)
+                    new_im = im.resize((new_width,new_height))
 
-            img = Image.open(uploaded_file)
-            img = img.resize(img.size, Image.ANTIALIAS)
-            saved_path = default_storage.save("{}.jpg".format(img_name), uploaded_file)
-            img.save("{}.jpg".format(img_name), quality=IMAGE_QUALITY, optimize=True)
-
-        elif(str(img_format).lower() == "jpg" or str(img_format).lower() == "jpeg"):
-
-            img = Image.open(uploaded_file)
-            img = img.resize(img.size, Image.ANTIALIAS)
-            saved_path = default_storage.save(filename, uploaded_file)
-            img.save(saved_path, quality=IMAGE_QUALITY, optimize=True)
-
-        else:
-            saved_path = default_storage.save(filename, uploaded_file)
+            if new_im!=None:
+                new_path = os.path.abspath(os.path.join(settings.MEDIA_ROOT,saved_path))
+                ext = filename.split('.')[-1].lower()
+                if ext in ['jpg', 'jpeg']:
+                    new_im.save(new_path, 'JPEG')
+                elif ext in ['png']:
+                    new_im.save(new_path, 'PNG')
+                elif ext in ['gif']:
+                    new_im.save(new_path, 'GIF')
 
         return saved_path
 
