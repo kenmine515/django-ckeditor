@@ -114,22 +114,23 @@ class ImageUploadView(generic.View):
         img_name, img_format = os.path.splitext(filename)
         IMAGE_QUALITY = getattr(settings, "IMAGE_QUALITY", 60)
 
-        img = Image.open(uploaded_file)
-        width, height = img.size
-        
-        if(settings.CKEDITOR_IMAGE_MAX_WIDTH>0 and settings.CKEDITOR_IMAGE_MAX_HEIGHT>0):
+        if is_image(filename):
+            img = Image.open(uploaded_file)
+            width, height = img.size
+            
+            if(settings.CKEDITOR_IMAGE_MAX_WIDTH>0 and settings.CKEDITOR_IMAGE_MAX_HEIGHT>0):
 
-            if width>height:
-                if width>settings.CKEDITOR_IMAGE_MAX_WIDTH:
-                    new_width = settings.CKEDITOR_IMAGE_MAX_WIDTH
-                    new_height = int(new_width/width*height)
+                if width>height:
+                    if width>settings.CKEDITOR_IMAGE_MAX_WIDTH:
+                        new_width = settings.CKEDITOR_IMAGE_MAX_WIDTH
+                        new_height = int(new_width/width*height)
+                else:
+                    if height>settings.CKEDITOR_IMAGE_MAX_HEIGHT:
+                        new_height = settings.CKEDITOR_IMAGE_MAX_HEIGHT
+                        new_width = int(new_height/height*width)
             else:
-                if height>settings.CKEDITOR_IMAGE_MAX_HEIGHT:
-                    new_height = settings.CKEDITOR_IMAGE_MAX_HEIGHT
-                    new_width = int(new_height/height*width)
-        else:
-            new_width = width
-            new_height = height
+                new_width = width
+                new_height = height
         
         if(str(img_format).lower() == "png"):
 
@@ -151,7 +152,7 @@ class ImageUploadView(generic.View):
             saved_path = default_storage.save(filename, uploaded_file)
 
         return saved_path
-
+    
     @staticmethod
     def _create_thumbnail_if_needed(backend, saved_path):
         if backend.should_create_thumbnail(saved_path):
