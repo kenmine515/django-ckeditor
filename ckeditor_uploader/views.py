@@ -183,7 +183,7 @@ class ImageUploadView(generic.View):
             
             #Connect to bucket and create key
             b = conn.get_bucket('learningcardsystem')
-            k = b.new_key(new_path)
+            k = b.new_key(filename)
             
             #Note we're setting contents from the in-memory string provided by cStringIO
             k.set_contents_from_string(out_im2.getvalue())
