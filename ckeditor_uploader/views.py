@@ -14,6 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from PIL import Image
 import boto
+import requests
 from io import StringIO
 
 from ckeditor_uploader import image_processing, utils
@@ -113,7 +114,7 @@ class ImageUploadView(generic.View):
     @staticmethod
     def _save_file(request, uploaded_file):
         
-        print('version=0.02')
+        print('version=0.03')
         
         filename = get_upload_filename(uploaded_file.name, request.user)
 
