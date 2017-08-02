@@ -113,7 +113,7 @@ class ImageUploadView(generic.View):
     @staticmethod
     def _save_file(request, uploaded_file):
         
-        print('version=0.01')
+        print('version=0.02')
         
         filename = get_upload_filename(uploaded_file.name, request.user)
 
@@ -162,33 +162,33 @@ class ImageUploadView(generic.View):
             print('new_path=' +str(new_path))
             
             #Retrieve our source image from a URL
-            fp = requests.get(new_path)
+            ##fp = requests.get(new_path)
             print('Opened upload file from Amazon S3')
             
             #Load the URL data into an image
-            img = StringIO.StringIO(fp.read())
-            im = Image.open(img)
+            ##img = StringIO.StringIO(fp.read())
+            ##im = Image.open(img)
             
             #Resize the image
-            im2 = im.resize((new_width,new_height), Image.NEAREST)
+            ##im2 = im.resize((new_width,new_height), Image.NEAREST)
             print('Image resized to ' + new_width + ',' + new_height)
             
             #NOTE, we're saving the image into a cStringIO object to avoid writing to disk
-            out_im2 = StringIO.StringIO()
+            ##out_im2 = StringIO.StringIO()
             #You MUST specify the file type because there is no file name to discern it from
-            im2.save(out_im2, 'JPG')
+            ##im2.save(out_im2, 'JPG')
             print('Image saved to memory')
             
             #Now we connect to our s3 bucket and upload from memory
             #credentials stored in environment AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
-            conn = boto.connect_s3()
+            ##conn = boto.connect_s3()
             
             #Connect to bucket and create key
-            b = conn.get_bucket('learningcardsystem')
-            k = b.new_key(filename)
+            ##b = conn.get_bucket('learningcardsystem')
+            ##k = b.new_key(filename)
             
             #Note we're setting contents from the in-memory string provided by cStringIO
-            k.set_contents_from_string(out_im2.getvalue())
+            ##k.set_contents_from_string(out_im2.getvalue())
             print('Image sent to Amazon S3')
 
         else:
