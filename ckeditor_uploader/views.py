@@ -15,7 +15,6 @@ from django.views.decorators.csrf import csrf_exempt
 from PIL import Image
 import boto
 import cStringIO
-import urllib
 
 from ckeditor_uploader import image_processing, utils
 from ckeditor_uploader.forms import SearchForm
@@ -160,7 +159,7 @@ class ImageUploadView(generic.View):
             print('new_path=' +str(new_path))
             
             #Retrieve our source image from a URL
-            fp = urllib.urlopen(new_path)
+            fp = requests.get(new_path)
             print('Opened upload file from Amazon S3')
             
             #Load the URL data into an image
