@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 
 from django.conf import settings
-from django.core.files.storage import default_storage
+from django.core.files.storage import default_storage as storage
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils.html import escape
@@ -13,6 +13,7 @@ from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
 
 from PIL import Image
+import StringIO
 
 from ckeditor_uploader import image_processing, utils
 from ckeditor_uploader.forms import SearchForm
@@ -144,29 +145,49 @@ class ImageUploadView(generic.View):
         
         if(str(img_format).lower() == ".png"):
 
-            img = Image.open(uploaded_file)
+            #img = Image.open(uploaded_file)
             #img = img.resize(img.size, Image.ANTIALIAS)
-            img = img.resize((new_width,new_height))
+            #img = img.resize((new_width,new_height))
             #saved_path = default_storage.save("{}.jpg".format(img_name), uploaded_file)
             saved_path = default_storage.save(filename, uploaded_file)
             #new_path = os.path.abspath(os.path.join(settings.MEDIA_ROOT,saved_path))
             new_path = os.path.join(settings.STATIC_ROOT,saved_path)
             print('new_path=' +str(new_path))
             #img.save("{}.jpg".format(img_name), quality=IMAGE_QUALITY, optimize=True)
-            img.save(new_path, quality=IMAGE_QUALITY, optimize=True)
+            #img.save(new_path, quality=IMAGE_QUALITY, optimize=True)
+            i = storage.open(uploaded_file,'w+')
+            m = storage.open(new_path,'r')
+            im = Image.open(m)
+            im = im.resize((new_width,new_height))
+            sfile = StringIO.StringIO()
+            im.save(sfile, format="PNG")
+            i.write(sfile.getvalue())
+            i.close()
+            m.close()
 
         elif(str(img_format).lower() == ".jpg" or str(img_format).lower() == ".jpeg"):
 
             print('img_format=' +str(img_format))
         
-            img = Image.open(uploaded_file)
+            #img = Image.open(uploaded_file)
             #img = img.resize(img.size, Image.ANTIALIAS)
-            img = img.resize((new_width,new_height))
+            #img = img.resize((new_width,new_height))
+            #saved_path = default_storage.save("{}.jpg".format(img_name), uploaded_file)
             saved_path = default_storage.save(filename, uploaded_file)
             #new_path = os.path.abspath(os.path.join(settings.MEDIA_ROOT,saved_path))
             new_path = os.path.join(settings.STATIC_ROOT,saved_path)
             print('new_path=' +str(new_path))
-            img.save(new_path, quality=IMAGE_QUALITY, optimize=True)
+            #img.save("{}.jpg".format(img_name), quality=IMAGE_QUALITY, optimize=True)
+            #img.save(new_path, quality=IMAGE_QUALITY, optimize=True)
+            i = storage.open(uploaded_file,'w+')
+            m = storage.open(new_path,'r')
+            im = Image.open(m)
+            im = im.resize((new_width,new_height))
+            sfile = StringIO.StringIO()
+            im.save(sfile, format="JPG")
+            i.write(sfile.getvalue())
+            i.close()
+            m.close()
 
         else:
             print('img_format=' +str(img_format))
