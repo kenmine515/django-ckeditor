@@ -26,6 +26,7 @@ def _get_user_path(user):
     if RESTRICT_BY_USER:
         try:
             user_prop = getattr(user, str(RESTRICT_BY_USER))
+            print('RESTRICT_BY_USER=' + str(RESTRICT_BY_USER))
         except (AttributeError, TypeError):
             user_prop = getattr(user, 'get_username')
 
