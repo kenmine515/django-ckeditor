@@ -112,6 +112,9 @@ class ImageUploadView(generic.View):
 
     @staticmethod
     def _save_file(request, uploaded_file):
+        
+        print('version=0.01')
+        
         filename = get_upload_filename(uploaded_file.name, request.user)
 
         img_name, img_format = os.path.splitext(filename)
