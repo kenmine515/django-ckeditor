@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 
 from django.conf import settings
-from django.core.files.storage import default_storage as storage
+from django.core.files.storage import default_storage
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils.html import escape
@@ -13,7 +13,9 @@ from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
 
 from PIL import Image
-import StringIO
+import boto
+import cStringIO
+import urllib
 
 from ckeditor_uploader import image_processing, utils
 from ckeditor_uploader.forms import SearchForm
@@ -145,52 +147,47 @@ class ImageUploadView(generic.View):
         
         if(str(img_format).lower() == ".png"):
 
-            #img = Image.open(uploaded_file)
-            #img = img.resize(img.size, Image.ANTIALIAS)
-            #img = img.resize((new_width,new_height))
-            #saved_path = default_storage.save("{}.jpg".format(img_name), uploaded_file)
             saved_path = default_storage.save(filename, uploaded_file)
-            #new_path = os.path.abspath(os.path.join(settings.MEDIA_ROOT,saved_path))
             new_path = os.path.join(settings.STATIC_ROOT,saved_path)
             print('new_path=' +str(new_path))
-            #img.save("{}.jpg".format(img_name), quality=IMAGE_QUALITY, optimize=True)
-            #img.save(new_path, quality=IMAGE_QUALITY, optimize=True)
-            #i = storage.open(uploaded_file,'w+')
-            m = storage.open(new_path,'r')
-            im = Image.open(m)
-            im = im.resize((new_width,new_height))
-            sfile = StringIO.StringIO()
-            im.save(sfile, format="JPG")
-            #i.write(sfile.getvalue())
-            #i.close()
-            m.close()
+
 
         elif(str(img_format).lower() == ".jpg" or str(img_format).lower() == ".jpeg"):
 
             print('img_format=' +str(img_format))
-        
-            #img = Image.open(uploaded_file)
-            #img = img.resize(img.size, Image.ANTIALIAS)
-            #img = img.resize((new_width,new_height))
-            #saved_path = default_storage.save("{}.jpg".format(img_name), uploaded_file)
             saved_path = default_storage.save(filename, uploaded_file)
-            #new_path = os.path.abspath(os.path.join(settings.MEDIA_ROOT,saved_path))
             new_path = os.path.join(settings.STATIC_ROOT,saved_path)
             print('new_path=' +str(new_path))
-            #img.save("{}.jpg".format(img_name), quality=IMAGE_QUALITY, optimize=True)
-            #img.save(new_path, quality=IMAGE_QUALITY, optimize=True)
-            #i = storage.open(uploaded_file,'w+')
-            m = default_storage.open(new_path,'r')
+            
+            #Retrieve our source image from a URL
+            fp = urllib.urlopen(new_path)
             print('Opened upload file from Amazon S3')
-            im = Image.open(m)
-            im = im.resize((new_width,new_height))
+            
+            #Load the URL data into an image
+            img = cStringIO.StringIO(fp.read())
+            im = Image.open(img)
+            
+            #Resize the image
+            im2 = im.resize((new_width,new_height), Image.NEAREST)
             print('Image resized to ' + new_width + ',' + new_height)
-            sfile = StringIO.StringIO()
-            im.save(sfile, format="JPG")
-            print('Image saved')
-            #i.write(sfile.getvalue())
-            #i.close()
-            m.close()
+            
+            #NOTE, we're saving the image into a cStringIO object to avoid writing to disk
+            out_im2 = cStringIO.StringIO()
+            #You MUST specify the file type because there is no file name to discern it from
+            im2.save(out_im2, 'JPG')
+            print('Image saved to memory')
+            
+            #Now we connect to our s3 bucket and upload from memory
+            #credentials stored in environment AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+            conn = boto.connect_s3()
+            
+            #Connect to bucket and create key
+            b = conn.get_bucket('learningcardsystem')
+            k = b.new_key(new_path)
+            
+            #Note we're setting contents from the in-memory string provided by cStringIO
+            k.set_contents_from_string(out_im2.getvalue())
+            print('Image sent to Amazon S3')
 
         else:
             print('img_format=' +str(img_format))
