@@ -114,39 +114,12 @@ class ImageUploadView(generic.View):
     @staticmethod
     def _save_file(request, uploaded_file):
         
-        print('version=0.04')
+        print('version=0.05')
         
         filename = get_upload_filename(uploaded_file.name, request.user)
 
         img_name, img_format = os.path.splitext(filename)
         IMAGE_QUALITY = getattr(settings, "IMAGE_QUALITY", 60)
-
-        if is_image(filename):
-            img = Image.open(uploaded_file)
-            width, height = img.size
-            
-            print('CKEDITOR_IMAGE_MAX_WIDTH=' +str(settings.CKEDITOR_IMAGE_MAX_WIDTH))
-            print('CKEDITOR_IMAGE_MAX_HEIGHT=' + str(settings.CKEDITOR_IMAGE_MAX_HEIGHT))
-            
-            if(settings.CKEDITOR_IMAGE_MAX_WIDTH>0 and settings.CKEDITOR_IMAGE_MAX_HEIGHT>0):
-
-                print('width=' +str(width))
-                print('height=' +str(height))
-            
-                if width>height:
-                    if width>settings.CKEDITOR_IMAGE_MAX_WIDTH:
-                        new_width = settings.CKEDITOR_IMAGE_MAX_WIDTH
-                        new_height = int(new_width/width*height)
-                else:
-                    if height>settings.CKEDITOR_IMAGE_MAX_HEIGHT:
-                        new_height = settings.CKEDITOR_IMAGE_MAX_HEIGHT
-                        new_width = int(new_height/height*width)
-            else:
-                new_width = width
-                new_height = height
-        
-        print('new_width=' +str(new_width))
-        print('new_height=' +str(new_height))
         
         if(str(img_format).lower() == ".png"):
 
@@ -161,36 +134,6 @@ class ImageUploadView(generic.View):
             saved_path = default_storage.save(filename, uploaded_file)
             new_path = os.path.join(settings.STATIC_ROOT,saved_path)
             print('new_path=' +str(new_path))
-            
-            #Retrieve our source image from a URL
-            fp = requests.get(new_path)
-            print('Opened upload file from Amazon S3')
-            
-            #Load the URL data into an image
-            img = StringIO.StringIO(fp.read())
-            im = Image.open(img)
-            
-            #Resize the image
-            im2 = im.resize((new_width,new_height), Image.NEAREST)
-            print('Image resized to ' + str(new_width) + ',' + str(new_height))
-            
-            #NOTE, we're saving the image into a cStringIO object to avoid writing to disk
-            out_im2 = StringIO.StringIO()
-            #You MUST specify the file type because there is no file name to discern it from
-            im2.save(out_im2, 'JPG')
-            print('Image saved to memory')
-            
-            #Now we connect to our s3 bucket and upload from memory
-            #credentials stored in environment AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
-            ##conn = boto.connect_s3()
-            
-            #Connect to bucket and create key
-            ##b = conn.get_bucket('learningcardsystem')
-            ##k = b.new_key(filename)
-            
-            #Note we're setting contents from the in-memory string provided by cStringIO
-            ##k.set_contents_from_string(out_im2.getvalue())
-            print('Image sent to Amazon S3')
 
         else:
             print('img_format=' +str(img_format))
@@ -203,6 +146,7 @@ class ImageUploadView(generic.View):
     def _create_thumbnail_if_needed(backend, saved_path):
         if backend.should_create_thumbnail(saved_path):
             backend.create_thumbnail(saved_path)
+            backend.resize(saved_path)
 
 
 upload = csrf_exempt(ImageUploadView.as_view())
