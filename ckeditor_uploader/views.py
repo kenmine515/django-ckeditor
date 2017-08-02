@@ -14,7 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from PIL import Image
 import boto
-import cStringIO
+from io import StringIO
 
 from ckeditor_uploader import image_processing, utils
 from ckeditor_uploader.forms import SearchForm
@@ -166,7 +166,7 @@ class ImageUploadView(generic.View):
             print('Opened upload file from Amazon S3')
             
             #Load the URL data into an image
-            img = cStringIO.StringIO(fp.read())
+            img = StringIO.StringIO(fp.read())
             im = Image.open(img)
             
             #Resize the image
@@ -174,7 +174,7 @@ class ImageUploadView(generic.View):
             print('Image resized to ' + new_width + ',' + new_height)
             
             #NOTE, we're saving the image into a cStringIO object to avoid writing to disk
-            out_im2 = cStringIO.StringIO()
+            out_im2 = StringIO.StringIO()
             #You MUST specify the file type because there is no file name to discern it from
             im2.save(out_im2, 'JPG')
             print('Image saved to memory')
