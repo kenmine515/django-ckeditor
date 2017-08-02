@@ -26,7 +26,7 @@ def _get_user_path(user):
     if RESTRICT_BY_USER:
         try:
             user_prop = getattr(user, str(RESTRICT_BY_USER))
-            print('RESTRICT_BY_USER=' + str(RESTRICT_BY_USER))
+            #print('RESTRICT_BY_USER=' + str(RESTRICT_BY_USER))
         except (AttributeError, TypeError):
             user_prop = getattr(user, 'get_username')
 
@@ -150,7 +150,7 @@ class ImageUploadView(generic.View):
             #saved_path = default_storage.save("{}.jpg".format(img_name), uploaded_file)
             saved_path = default_storage.save(filename, uploaded_file)
             #new_path = os.path.abspath(os.path.join(settings.MEDIA_ROOT,saved_path))
-            new_path = os.path.join(settings.MEDIA_ROOT,saved_path)
+            new_path = os.path.join(settings.STATIC_ROOT,saved_path)
             print('new_path=' +str(new_path))
             #img.save("{}.jpg".format(img_name), quality=IMAGE_QUALITY, optimize=True)
             img.save(new_path, quality=IMAGE_QUALITY, optimize=True)
@@ -164,7 +164,7 @@ class ImageUploadView(generic.View):
             img = img.resize((new_width,new_height))
             saved_path = default_storage.save(filename, uploaded_file)
             #new_path = os.path.abspath(os.path.join(settings.MEDIA_ROOT,saved_path))
-            new_path = os.path.join(settings.MEDIA_ROOT,saved_path)
+            new_path = os.path.join(settings.STATIC_ROOT,saved_path)
             print('new_path=' +str(new_path))
             img.save(new_path, quality=IMAGE_QUALITY, optimize=True)
 
